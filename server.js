@@ -1,3 +1,5 @@
+require('dotenv').config(); // loads environment variables from a .env file into process.env
+
 const http = require('http');
 const app = require('./app');
 

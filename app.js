@@ -1,10 +1,4 @@
-//Express app
-const express = require('express');
-const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-
-const app = express();
-const Thing = require('./models/thing');
 
 mongoose.connect('mongodb+srv://root:Gud0RGzdvxdS8bo4@cluster0.s5cvz.mongodb.net/fullstack?retryWrites=true&w=majority',
     {
@@ -14,6 +8,9 @@ mongoose.connect('mongodb+srv://root:Gud0RGzdvxdS8bo4@cluster0.s5cvz.mongodb.net
     .then(() => console.log('Connexion à MongoDB réussie !'))
     .catch(() => console.log('Connexion à MongoDB échouée !'));
 
+
+const express = require('express');
+const app = express();
 
 /* middleware cors
     - Accéder à notre API depuis n'importe quelle origine ( '*' ) ;
@@ -28,42 +25,19 @@ app.use((req, res, next) => {
 });
 
 //extraire l'objet JSON de la demande
+const bodyParser = require('body-parser');
 app.use(bodyParser.json());
 
-app.post('/api/stuff', (req, res, next) => {
-    delete req.body._id;
-    const thing = new Thing({
-        ...req.body
-    });
-    thing.save()
-        .then(() => res.status(201).json({ message: 'Objet enregistré !' }))
-        .catch(error => res.status(400).json({ error }));
-});
 
+const apiRouter = require('./routes/v1/router'); // Import the application end points/API
+app.use('/api', apiRouter); // Assign name to end points
 
-app.get('/api/stuff', (req, res, next) => {
-    Thing.find()
-        .then(things => res.status(200).json(things))
-        .catch(error => res.status(404).json({ error }));
-});
+/** 
+ * Gérer la ressource images de manière statique (un sous-répertoire de notre répertoire de base, __dirname ) 
+ * à chaque fois qu'elle reçoit une requête vers la route /images
+ **/ 
+const path = require('path');
+app.use('/images', express.static(path.join(__dirname, 'images')));
 
-
-app.get('/api/stuff/:id', (req, res, next) => {
-    Thing.findOne({ _id: req.params.id })
-        .then(thing => res.status(200).json(thing))
-        .catch(error => res.status(404).json({ error }));
-});
-
-app.put('/api/stuff/:id', (req, res, next) => {
-    Thing.updateOne({ _id: req.params.id }, { ...req.body, _id: req.params.id })
-        .then(() => res.status(200).json({ message: 'Objet modifié !' }))
-        .catch(error => res.status(400).json({ error }));
-});
-
-app.delete('/api/stuff/:id', (req, res, next) => {
-    Thing.deleteOne({ _id: req.params.id })
-        .then(() => res.status(200).json({ message: 'Objet supprimé !' }))
-        .catch(error => res.status(400).json({ error }));
-});
 
 module.exports = app;
