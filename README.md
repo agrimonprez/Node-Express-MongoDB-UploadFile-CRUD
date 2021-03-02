@@ -1,4 +1,3 @@
-# fullstack-js
 Node, Express, MongoDB, UploadFile
 Serveur Node, application Express
 Authentification avec MongoDB (Mongoose), 
